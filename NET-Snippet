@@ -1,0 +1,20 @@
+  // What to do when the garage button is clicked  
+     private void OperateGarage()  
+     {  
+       try  
+       {  
+      // The IP address needs to be changed according to your RPi box  
+       var uri = new Uri("http://192.168.1.82/index.php");  
+       var values = new List<KeyValuePair<string, string>>  
+         {  
+            new KeyValuePair<string, string>("OPEN", "" )  
+         };  
+       var httpClient = new HttpClient(new HttpClientHandler());  
+       HttpResponseMessage response = await httpClient.PostAsync(uri, new FormUrlEncodedContent(values));  
+       response.EnsureSuccessStatusCode();  
+       var responseString = await response.Content.ReadAsStringAsync();  
+       }  
+       catch(Exception)  
+       {  
+         MessageBox.Show("Oops, Unsure if Garage is open or not. Please visually check");  
+       }  
