@@ -1,0 +1,20 @@
+private void OperateGarage()  
+      {  
+           // The IP address needs to be changed according to your RPi box  
+           String RPI_IP = "http://192.168.1.82/index.php";  
+           String param = "OPEN";  
+            HttpClient httpclient = new DefaultHttpClient();  
+             HttpPost httppost = new HttpPost(RPI_IP);  
+             try {  
+               // Add your data  
+               List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);  
+               nameValuePairs.add(new BasicNameValuePair("OPEN", ""));  
+               httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));  
+               // Execute HTTP Post Request  
+               HttpResponse response = httpclient.execute(httppost);  
+             } catch (ClientProtocolException e) {  
+               // TODO Auto-generated catch block  
+             } catch (IOException e) {  
+               // TODO Auto-generated catch block  
+             }  
+      }  
