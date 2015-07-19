@@ -1,4 +1,4 @@
-
+<!-- Can be found as /var/www/index.php -->
 <head>
 <meta charset="UTF-8" http-equiv="refresh" content="15" />
 <title>Garage Operator</title>
