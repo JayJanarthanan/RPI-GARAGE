@@ -12,4 +12,4 @@
 
 The setup currently runs on Raspbian with Apache Web Server. Script attached. Requests are made via POST.
 
-Project done by Jay Janarthanan. You are free to use the code in this repositary for any purpose. 
+Project done by Jay Janarthanan. You are free to use the code in this repository for any purpose. 
