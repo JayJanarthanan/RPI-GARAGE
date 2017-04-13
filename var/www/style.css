@@ -1,39 +1,79 @@
+h1, h2, h3, p {
 
-.button {
-font-size:500%;
-font-family: Segoe UI
-    display: block;
-    height: 30%;
-    width: 100%;
-    background: #66CCFF;
-    border: 2px solid rgba(33, 68, 72, 0.59);
+  font-family: Segoe,Segoe UI,Optima,Arial,sans-serif;
 }
 
-.h1 {
-font-family: Segoe UI;
-font-size: 24px;
-font-style: normal;
-font-variant: normal;
-line-height: 17.6px;
-
+.btn {
+  background: #3498db;
+  background-image: -webkit-linear-gradient(top, #3498db, #2980b9);
+  background-image: -moz-linear-gradient(top, #3498db, #2980b9);
+  background-image: -ms-linear-gradient(top, #3498db, #2980b9);
+  background-image: -o-linear-gradient(top, #3498db, #2980b9);
+  background-image: linear-gradient(to bottom, #3498db, #2980b9);
+  -webkit-border-radius: 9;
+  -moz-border-radius: 9;
+  border-radius: 9px;
+  font-family: Arial;
+  color: #ffffff;
+  font-size: 38px;
+  padding: 20px 20px 20px 20px;
+  text-decoration: none;
 }
 
-.status {
-font-family: Segoe UI;
-font-size: 1000%;
-font-style: normal;
-font-variant: normal;
-line-height: 100%;
-text-align: center;
-
+.btn:hover {
+  background: #3cb0fd;
+  text-decoration: none;
 }
 
-.body {
-font-family: Segoe UI;
-font-size: 16px;
-font-style: normal;
-font-variant: normal;
-font-weight: 100;
-line-height: 17.6px;
+* {
+ font-size: 100%;
+ font-family: Verdana;
+}
 
+.container {
+	
+	 text-align: center;
+}
+
+header, footer {
+    padding: 1em;
+    color: white;
+    background-color: black;
+    clear: left;
+    text-align: center;
+}
+
+button {
+    background-color: #4CAF50; /* Green */
+    border: 2px solid #4CAF50;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+	margin: 16px;
+}
+
+button:hover {
+    background-color: white; /* Green */
+	border: 2px solid #4CAF50;
+    color: #4CAF50;
+}
+
+
+#status {
+	font-size: 90px;
+	padding: 1px;
+	margin: 1px;
+	
+}
+
+
+.imageHolder {
+	max-width: 520px;
+	max-height: 320px;
+	width: 100%;
+	height: 320px;
+	
 }
