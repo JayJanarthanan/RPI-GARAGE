@@ -1,48 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<title>JANA GARAGE</title>
-	<meta name="viewport" content="width=device-width, user-scalable=no, minimal-ui">
-	<link rel="apple-touch-icon" sizes="120x120" href="touch-icon-iphone-retina.png">
-	<style>
-	html, body, div, button {
-		margin: 0;
-		padding: 0;
-		font-family: "Helvetica Neue";
-	}
+<html>
+	<head>
+	<link rel="stylesheet" type="text/css" href="style.css">
+	</head>
 
-	body {
-		background-color: #EAEAEA;
-	}
+	<body>
+		<div class="container">
+			<header>
+			   <h1>Jana Garage</h1>
+			</header>
+			<section>
+				<h1>Status</h1>
+				
+				<h2 id='status'>UNKNOWN</h2>
 
-	button {
-		background-color: #FFFFFF;
-		border: 1px solid #C9C9C9;
-		border-right: 0px solid #000;
-		border-left: 0px solid #000;
-		font-size: 1.5em;
-		margin-top: 20px;
-		width: 100%;
-		height: 44px;
-	}
-	</style>
-</head>
-<body>
-	<button onclick="openRight()">Right Garage</button>
-	<script>
+				<button onclick="open()" name="OPEN"> Operate Door </button>
+				
+				
+				<script>
+				function post(url) {
+					var request = new XMLHttpRequest();
+					request.open('POST', url, true);
+					request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+					request.send({});
+				}
+				function open() { post("/api/garage/right"); }
+				</script>	
+				
+				
+				
 
-	function post(url) {
-		var request = new XMLHttpRequest();
-		request.open('POST', url, true);
-		request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
-		request.send({});
-	}
-
-
-	function openRight() { post("/api/garage/right"); }
-
-	</script>
-
-</body>
+				<h2>Visual</h2>
+				
+			</section>
+			
+			<section>
+				<h1> Other Details </h1>
+				<p> Temperature </p>
+				<p> Time </p>
+				<p> Sensor Range </p>
+			</section>
+			
+			<footer>Last updated 14 April 2017.</footer>
+		</div>
+	</body>
 </html>

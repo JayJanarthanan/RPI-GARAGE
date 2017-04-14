@@ -1,15 +1,22 @@
+//Load Javascript modules
+
 var express = require('express'),
 	path = require('path'),
-	config = require('./config'),
 	async = require('async'),
-	gpio = require('pi-gpio'),
+	gpio = require('rpi-gpio'),
 	usonic = require('r-pi-usonic'),
 	app = express();
 
+//Operate on Port 3000 for testing
+
 app.set('port', process.env.PORT || 3000);
+
+// HTML static file goes in the /public folder
 
 app.use('/', express.static(__dirname + '/public'));
 
+
+// Initalise the Ultrasonic sensor, once and only once
 usonic.init(function (error) {
     if (error) {
 
@@ -18,14 +25,15 @@ usonic.init(function (error) {
     }
 });
 
-
+// The ultrasonic sensor code?
 var sensor = usonic.createSensor(24, 23, 450);
 var distance = sensor();
 
+
+
+// All of this stuff should be to operate the garage door
 function delayPinWrite(pin, value, callback) {
-	setTimeout(function() {
-		gpio.write(pin, value, callback);
-	}, config.RELAY_TIMEOUT);
+	setTimeout(function() {gpio.write(pin, value, callback);}, 500);
 }
 
 app.get("/api/ping", function(req, res) {
@@ -37,23 +45,23 @@ app.post("/api/garage/right", function(req, res) {
 	async.series([
 		function(callback) {
 			// Open pin for output
-			gpio.open(config.RIGHT_GARAGE_PIN, "output", callback);
+			gpio.open(14, "output", callback);
 		},
 		function(callback) {
 			// Turn the relay on
-			gpio.write(config.RIGHT_GARAGE_PIN, config.RELAY_ON, callback);
+			gpio.write(14, 0, callback);
 		},
 		function(callback) {
 			// Turn the relay off after delay to simulate button press
-			delayPinWrite(config.RIGHT_GARAGE_PIN, config.RELAY_OFF, callback);
+			delayPinWrite(14, 1, callback);
 		},
 		function(err, results) {
 			setTimeout(function() {
 				// Close pin from further writing
-				gpio.close(config.RIGHT_GARAGE_PIN);
+				gpio.close(14);
 				// Return json
 				res.json("ok");
-			}, config.RELAY_TIMEOUT);
+			}, 500);
 		}
 	]);
 });
