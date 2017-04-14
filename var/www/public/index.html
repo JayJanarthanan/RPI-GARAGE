@@ -14,13 +14,24 @@
 				
 				<h2 id='status'>UNKNOWN</h2>
 
-				<form method="post">
-					<button name="OPEN"> Operate Door </button>
-				</form>
-			
-				<h2>Visual</h2>
-				<iframe id="photoFrame" class="imageHolder" src="http://192.168.1.20/cam/cam_pic.php"></iframe> 
+				<button onclick="open()" name="OPEN"> Operate Door </button>
+				
+				
+				<script>
+				function post(url) {
+					var request = new XMLHttpRequest();
+					request.open('POST', url, true);
+					request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+					request.send({});
+				}
+				function open() { post("/api/garage/right"); }
+				</script>	
+				
+				
+				
 
+				<h2>Visual</h2>
+				
 			</section>
 			
 			<section>
