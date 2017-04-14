@@ -1,11 +1,11 @@
 //Load Javascript modules
+// Based off https://github.com/brentnycum/garage-node
 
 var express = require('express'),
-	path = require('path'),
 	async = require('async'),
 	gpio = require('rpi-gpio'),
-	usonic = require('r-pi-usonic'),
-	app = express();
+	app = express(),
+	pin = 11;
 
 //Operate on Port 3000 for testing
 
@@ -16,54 +16,56 @@ app.set('port', process.env.PORT || 3000);
 app.use('/', express.static(__dirname + '/public'));
 
 
-// Initalise the Ultrasonic sensor, once and only once
-usonic.init(function (error) {
-    if (error) {
 
-    } else {
-       
-    }
-});
-
-// The ultrasonic sensor code?
-var sensor = usonic.createSensor(24, 23, 450);
-var distance = sensor();
-
-
-
-// All of this stuff should be to operate the garage door
-function delayPinWrite(pin, value, callback) {
-	setTimeout(function() {gpio.write(pin, value, callback);}, 500);
-}
-
-app.get("/api/ping", function(req, res) {
-	res.json("pong");
+app.post("/api/garage/open", function(req, res) {
+	OperateDoor();
 });
 
 
-app.post("/api/garage/right", function(req, res) {
+var OperateDoor = function () {
+
+ 	console.log("Operating Garage");
+
 	async.series([
 		function(callback) {
 			// Open pin for output
-			gpio.open(14, "output", callback);
+			gpio.setup(pin, gpio.DIR_OUT);
+
 		},
 		function(callback) {
 			// Turn the relay on
-			gpio.write(14, 0, callback);
+			gpio.write(pin, 1, callback);
 		},
 		function(callback) {
 			// Turn the relay off after delay to simulate button press
-			delayPinWrite(14, 1, callback);
+			delayedWrite(pin, 0, callback);
+		},
+
+		function(callback) {
+			// Turn the relay on
+			gpio.write(pin, 1, callback);
 		},
 		function(err, results) {
 			setTimeout(function() {
 				// Close pin from further writing
-				gpio.close(14);
+				gpio.close(pin);
+				console.log("Operating Garage");
 				// Return json
 				res.json("ok");
-			}, 500);
+			}, 60);
 		}
 	]);
-});
 
-app.listen(app.get('port'));
+};
+
+function delayedWrite(pin, value, callback) {
+    setTimeout(function() {
+        gpio.write(pin, value, callback);
+    }, 50);
+}
+
+
+
+//console.log("Listening on port 3000");
+//app.listen(app.get('port'));
+OperateDoor();
