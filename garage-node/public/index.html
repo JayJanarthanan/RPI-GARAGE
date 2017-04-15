@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<title>JANA GARAGE</title>
+
+	 <!-- jQuery -->
+	<script src="http://code.jquery.com/jquery.js"></script>
+	<script src='/socket.io/socket.io.js'></script>
+		
+	<script>
+		var socket = io();
+		// Get data from the app.js file every x seconds and update our info.
+		// status, time and actual measurement
+		socket.on('status', function(data) {
+			var status = document.getElementById('status');
+			var range = document.getElementById('range');
+			var time = document.getElementById('time');
+			status.innerHTML = data.status;
+			range.innerHTML = "Measured Range is: " + data.range;
+			time.innerHTML = "Last Measured: " + data.time;
+		});
+
+		socket.on('liveStream', function(url) {
+			$('#stream').attr('src', url);
+			$('#startCam').hide();
+		});
+	
+		function startStream() {
+			socket.emit('start-stream');
+			$('#startCam').hide();
+		}
+		
+		function openSignal(){
+			socket.emit('operate-garage');
+		}
+
+
+	</script>
+
+	</head>
+
+	<body>
+		<div class="container">
+			<header>
+			   <h1>Jana Garage</h1>
+			</header>
+			<section>
+				<h1>Status</h1>	
+				<h2 id='status'>UNKNOWN</h2>
+				<button type="button" id="startDoor" onclick="openSignal()"> Operate Door </button>
+				
+				<h2>Visual</h2>
+				<button type="button" id="startCam" onclick="startStream()">Start Camera</button>
+
+				<img id="stream" src="">
+
+			
+			</section>
+			
+			<section>
+				<h1> Other Details </h1>
+				<p id='temp'> Temperature </p>
+				<p id='time'> Time </p>
+				<p id='range'> Sensor Range:  </p>
+			</section>
+			
+			<footer>Last updated 15 April 2017.</footer>
+		</div>
+	</body>
+</html>
