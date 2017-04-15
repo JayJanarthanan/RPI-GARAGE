@@ -59,7 +59,7 @@ function stopStreaming() {
 function startStreaming(io) {
  
   if (app.get('watchingFile')) {
-    io.sockets.emit('liveStream', 'cam.jpg');
+    io.sockets.emit('liveStream', 'cam.jpg?_t=' + (Math.random() * 100000));
     return;
   }
  
@@ -71,7 +71,7 @@ function startStreaming(io) {
   app.set('watchingFile', true);
  
   fs.watchFile('./public/cam.jpg', function(current, previous) {
-    io.sockets.emit('liveStream', '/cam.jpg');
+    io.sockets.emit('liveStream', 'cam.jpg?_t=' + (Math.random() * 100000));
   })
  
 }
@@ -153,6 +153,10 @@ var getStatus = function () {
     var distance = sensor();
     var status = "Unknown";
 	var openValue = 25, closedValue = 80;
+
+	if(distance < 0){
+		return["UNKNOWN", distance];
+	}
     
     if (distance < openValue) {
        	status = "Open";
