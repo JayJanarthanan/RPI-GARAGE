@@ -6,7 +6,8 @@ var io = require('socket.io')(http);
 var async = require('async');
 var gpio = require('rpi-gpio');
 var fs = require('fs');
-var sendgrid = require('sendgrid')('azure_ea3d41ccd1bc355acf2d8cfc85de84e1@azure.com', sendgrid_password);
+var helper = require('sendgrid').mail;
+
 
 var spawn = require('child_process').spawn;
 var proc;
@@ -154,6 +155,7 @@ var getStatus = function () {
 
     var status = "Unknown";
 	var openValue = 25, closedValue = 80;
+	var emailSent = false; //false when garage is open and no email, true when email sent.
 
 	if(distance < 0){
 		return["UNKNOWN", distance];
@@ -161,11 +163,16 @@ var getStatus = function () {
     
     if (distance < openValue) {
        	status = "Open";
+		if(emailSent == false) // Check if email has already been sent.
+		{
+			sendEmail();
+			emailSent = true; //set that the email has been sent
+		}
 
-		   //check time and triggeer
     }
     else if(distance > closedValue) {
         status = "Closed";
+		emailSent = false; //reset email sent notification
     }
      else {
 		status = "Unknown";
@@ -185,6 +192,7 @@ usonic.init(function (error) {
 });
 
 // Other functions
+// Need to work on this
 function getTime(){
   var a = new Date();
   var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -213,24 +221,33 @@ setInterval(sendStatus, 5000);
 
 
 function sendEmail(){
-// https://docs.microsoft.com/en-us/azure/store-sendgrid-nodejs-how-to-send-email
+// from SendGrid v3 Docs
 
-var email = new sendgrid.Email({
-    to: 'john@contoso.com',
-    from: 'notify@appavate.com',
-    subject: 'JANA GARAGE - TEST',
-    text: 'This email is a test email'
-});
+	var API_KEY = '<INSERT_HERE>'
+
+	from_email = new helper.Email("notify@appavate.com");
+	to_email = new helper.Email("support@appavate.com");
+	subject = "JANA GARAGE - OPEN";
+	content = new helper.Content("text/plain", "Hi There, The Raspberry Pi in your garage has detected your garage is open at this time. Thanks, Jay");
+	mail = new helper.Mail(from_email, subject, to_email, content);
 
 
-sendgrid.send(email, function(err, json){
-    if(err) { return console.error(err); }
-    console.log(json);
-});
+	var sg = require('sendgrid')(API_KEY);
+	var request = sg.emptyRequest({
+		method: 'POST',
+		path: '/v3/mail/send',
+		body: mail.toJSON()
+	});
+
+	sg.API(request, function(error, response) {
+		if(response.statusCode == 202)
+		{
+		console.log("Email successfully sent.");
+		}
+	});
 
 
 }
-
 
 
 
