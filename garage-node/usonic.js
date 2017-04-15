@@ -1,5 +1,20 @@
 var usonic = require('r-pi-usonic');
-var app = require('express');
+var http = require('http'),
+    fs = require('fs'),
+    // NEVER use a Sync function except at start-up!
+    index = fs.readFileSync(__dirname + '/index.html');
+
+
+// Send index.html to all requests
+var app = http.createServer(function(req, res) {
+    res.writeHead(200, {'Content-Type': 'text/html'});
+    res.end(index);
+});
+
+
+
+// Socket.io server listens to our app
+var io = require('socket.io').listen(app);
 
 
 var getStatus = function () {
@@ -20,10 +35,8 @@ var getStatus = function () {
         process.stdout.write("UNKNOWN "+ statusText);
          status = "Unknown";
     }
-
     return status;
-   
-};
+  };
 
 usonic.init(function (error) {
     if (error) {
@@ -34,9 +47,14 @@ usonic.init(function (error) {
 });
 
 
+// Send current garage status to connected clients
+function sendStatus() {
+    io.emit('status', { status: getStatus() });
+}
 
-app.get('/', function (req, res) {
-    var data = getStatus();
-    res.send(data);
-});
+// Send current time every 5 secs
+setInterval(sendStatus, 5000);
 
+
+
+app.listen(3000);
