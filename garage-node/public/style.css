@@ -77,3 +77,11 @@ button:hover {
 	height: 320px;
 	
 }
+
+
+#stream {
+    height: 99%;
+    margin: 0px auto;
+    display: block;
+    margin-top: 20px;
+}

@@ -1,19 +1,9 @@
 <!DOCTYPE html>
 <html>
 	<head>
+	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 	<link rel="stylesheet" type="text/css" href="style.css">
 	<title>JANA GARAGE</title>
-
-	<style type="text/css">
-	#stream {
-		height: 99%;
-		margin: 0px auto;
-		display: block;
-		margin-top: 20px;
-	}
-	</style>
-	
-
 
 	 <!-- jQuery -->
 	<script src="http://code.jquery.com/jquery.js"></script>
@@ -34,26 +24,20 @@
 
 		socket.on('liveStream', function(url) {
 			$('#stream').attr('src', url);
-			$('.start').hide();
+			$('#startCam').hide();
 		});
 	
-	  function startStream() {
-    	socket.emit('start-stream');
-    	$('.start').hide();
-  		}
+		function startStream() {
+			socket.emit('start-stream');
+			$('#startCam').hide();
+		}
+		
+		function openSignal(){
+			socket.emit('operate-garage');
+		}
 
 
 	</script>
-	<script>
-		//The javascript to create a POST request back to app.js to operate the door
-		function open() { 
-			var url = "/api/garage/open";
-			var request = new XMLHttpRequest();
-			request.open('POST', url, true);
-			request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
-			request.send({});
-		}
-	</script>	
 
 	</head>
 
@@ -65,10 +49,10 @@
 			<section>
 				<h1>Status</h1>	
 				<h2 id='status'>UNKNOWN</h2>
-				<button type="button" onclick="open()" name="OPEN"> Operate Door </button>
+				<button type="button" id="startDoor" onclick="openSignal()"> Operate Door </button>
 				
 				<h2>Visual</h2>
-				<button type="button" id="" onclick="startStream()">Start Camera</button>
+				<button type="button" id="startCam" onclick="startStream()">Start Camera</button>
 
 				<img id="stream" src="">
 

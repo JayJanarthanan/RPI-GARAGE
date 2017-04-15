@@ -44,17 +44,25 @@ io.on('connection', function(socket) {
   socket.on('start-stream', function() {
     startStreaming(io);
   });
+
+    socket.on('operate-garage', function() {
+		console.log('Operate Door command received');
+    	OperateDoor();
+  });
  
 });
 
-
+// Caled to end stream and stop wasting valuable memory
 function stopStreaming() {
+	console.log('Killing stream');
   if (Object.keys(sockets).length == 0) {
     app.set('watchingFile', false);
     if (proc) proc.kill();
     fs.unwatchFile('./public/cam.jpg');
   }
 }
+
+//Called when we want to start streaming.
  
 function startStreaming(io) {
  
@@ -78,19 +86,9 @@ function startStreaming(io) {
 
 
 
+// Door Functionality
 
-
-
-
-
-// Setup the functionalities
-
-// DOOR OPERATIONS //
-app.post("/api/garage/open", function(req, res) {
-	OperateDoor();
-});
-
-
+//This thing refuses to work
 var OperateDoor = function () {
 
  	console.log("Operating Garage");
@@ -137,11 +135,11 @@ var OperateDoor = function () {
 	return;
 
 };
-
+// Hold for 500ms
 function delayedWrite(pin, value, callback) {
     setTimeout(function() {
         gpio.write(pin, value, callback);
-    }, 50);
+    }, 500);
 }
 
 
@@ -151,6 +149,8 @@ function delayedWrite(pin, value, callback) {
 var getStatus = function () {
     var sensor = usonic.createSensor(24, 23, 500);
     var distance = sensor();
+	distance = distance.toFixed(2);
+	
     var status = "Unknown";
 	var openValue = 25, closedValue = 80;
 
@@ -172,7 +172,7 @@ var getStatus = function () {
   };
 
 
-
+// Initalise the Ultrasonic sensor, once and only once
 usonic.init(function (error) {
     if (error) {
         console.log(error);
@@ -183,8 +183,16 @@ usonic.init(function (error) {
 
 // Other functions
 function getTime(){
-    var datetime = new Date();
-    return datetime;
+  var a = new Date();
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var year = a.getFullYear();
+  var month = months[a.getMonth()];
+  var date = a.getDate();
+  var hour = a.getHours();
+  var min = a.getMinutes();
+  var sec = a.getSeconds();
+  var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
+  return time;
 }
 
 
@@ -194,5 +202,16 @@ function sendStatus() {
     io.emit('status', { status: statusReport[0], range: statusReport[1], time: getTime() });
 }
 
-// Send current time every 5 secs
+// Send current status of the garage every 5 seconds
 setInterval(sendStatus, 5000);
+
+
+
+
+
+
+
+
+///// CREDITS /////////////
+
+// Camera Stuff: http://thejackalofjavascript.com/rpi-live-streaming/500ms
