@@ -1,7 +1,5 @@
 sudo apt-get update && sudo apt-get upgrade  
-sudo apt-get install python-dev  
-sudo apt-get install python-rpi.gpio  
-sudo apt-get install apache2 php5 libapache2-mod-php5  
-sudo service apache2 restart  
-sudo nano /etc/sudoers  
-//add to bottom of file: www-data ALL=(root) NOPASSWD:ALL  
+sudo apt-get install nodejs npm node-semver
+mkdir garage-node && cd garage-node
+sudo npm install async express r-pi-usonic rpi-gpio socket.io sendgrid
+sudo reboot
