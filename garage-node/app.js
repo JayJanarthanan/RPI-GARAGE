@@ -57,7 +57,7 @@ var OperateDoor = function () {
 			setTimeout(function() {
 				console.log("ERROR");
 				// Close pin from further writing
-				gpio.close(pin);
+				//gpio.close(pin);
 				// Return json
 				res.json("ok");
 			}, 500);
@@ -74,9 +74,11 @@ function delayedWrite(pin, value, callback) {
     }, 50);
 }
 
+app.get('/', function (req, res) {
+  res.send('Hello World!')
+})
 
 
-//console.log("Listening on port 3000");
-//app.listen(app.get('port'));
-gpio.destroy();
-OperateDoor();
+app.listen(3000, function () {
+  console.log('App is listening on port 3000!')
+})
