@@ -6,7 +6,9 @@
 	<script>
 		var socket = io();
 
+		socket.on('status', function(data) {
 			var status = document.getElementById('status');
+			status.innerHTML = data.status;
 		});
 	</script>
 	<script>
