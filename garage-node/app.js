@@ -1,22 +1,34 @@
-//Load Javascript modules
-// Based off https://github.com/brentnycum/garage-node
+var usonic = require('r-pi-usonic');
+var express = require('express');
+var app = express();
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
+var async = require('async');
+var gpio = require('rpi-gpio');
+var port = process.env.PORT || 3000;
 
-var express = require('express'),
-	async = require('async'),
-	gpio = require('rpi-gpio'),
-	app = express(),
-	pin = 11;
+var pin = 11;
 
 
+//Setup the web page and processes
 
-//Operate on Port 3000 for testing
+app.get('/', function(req, res){
+    res.sendfile(__dirname + '/index.html');
+});
 
-app.set('port', process.env.PORT || 3000);
+http.listen(port, function(){
+  console.log('listening on *:' + port);
+});
 
 // HTML static file goes in the /public folder
+//app.set('port', port);
+//app.use('/', express.static(__dirname + '/public'));
 
-app.use('/', express.static(__dirname + '/public'));
 
+
+// Setup the functionalities
+
+// DOOR OPERATIONS //
 app.post("/api/garage/open", function(req, res) {
 	OperateDoor();
 });
@@ -25,6 +37,7 @@ app.post("/api/garage/open", function(req, res) {
 var OperateDoor = function () {
 
  	console.log("Operating Garage");
+	process.stdout.write("Operating Garage");
 
 	async.series([
 		function(callback) {
@@ -74,11 +87,51 @@ function delayedWrite(pin, value, callback) {
     }, 50);
 }
 
-app.get('/', function (req, res) {
-  res.send('Hello World!')
-})
+
+// DOOR STATUS //
+
+//RETURNS AN ARRAY [STATUS, DISTANCE]
+var getStatus = function () {
+    var sensor = usonic.createSensor(24, 23, 500);
+    var distance = sensor();
+    var status = "Unknown";
+	var openValue = 25, closedValue = 80;
+    
+    if (distance < openValue) {
+       	status = "Open";
+    }
+    else if(distance > closedValue) {
+        status = "Closed";
+    }
+     else {
+		status = "Unknown";
+    }
+	process.stdout.write(status + " " + distance);
+    return [status, distance];
+  };
 
 
-app.listen(3000, function () {
-  console.log('App is listening on port 3000!')
-})
+
+usonic.init(function (error) {
+    if (error) {
+        console.log(error);
+    } else {
+        //printDistance();
+    }
+});
+
+// Other functions
+function getTime(){
+    var datetime = new Date();
+    return datetime;
+}
+
+
+// Send current garage status to connected clients
+function sendStatus() {
+    var statusReport = getStatus();
+    io.emit('status', { status: statusReport[0], range: statusReport[1], time: getTime() });
+}
+
+// Send current time every 5 secs
+setInterval(sendStatus, 5000);

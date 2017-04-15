@@ -5,7 +5,8 @@
 	<script src='/socket.io/socket.io.js'></script>
 	<script>
 		var socket = io();
-
+		// Get data from the app.js file every x seconds and update our info.
+		// status, time and actual measurement
 		socket.on('status', function(data) {
 			var status = document.getElementById('status');
 			var range = document.getElementById('range');
@@ -16,13 +17,14 @@
 		});
 	</script>
 	<script>
-	function post(url) {
-		var request = new XMLHttpRequest();
-		request.open('POST', url, true);
-		request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
-		request.send({});
-	}
-	function open() { post("/api/garage/open"); }
+		//The javascript to create a POST request back to app.js to operate the door
+		function open() { 
+			var url = "/api/garage/open";
+			var request = new XMLHttpRequest();
+			request.open('POST', url, true);
+			request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+			request.send({});
+		}
 	</script>		
 
 	</head>
@@ -33,10 +35,8 @@
 			   <h1>Jana Garage</h1>
 			</header>
 			<section>
-				<h1>Status</h1>
-				
+				<h1>Status</h1>	
 				<h2 id='status'>UNKNOWN</h2>
-
 				<button onclick="open()" name="OPEN"> Operate Door </button>
 				
 				<h2>Visual</h2>
