@@ -2,7 +2,23 @@
 <html>
 	<head>
 	<link rel="stylesheet" type="text/css" href="style.css">
+	<title>JANA GARAGE</title>
+
+	<style type="text/css">
+	#stream {
+		height: 99%;
+		margin: 0px auto;
+		display: block;
+		margin-top: 20px;
+	}
+	</style>
+	
+
+
+	 <!-- jQuery -->
+	<script src="http://code.jquery.com/jquery.js"></script>
 	<script src='/socket.io/socket.io.js'></script>
+		
 	<script>
 		var socket = io();
 		// Get data from the app.js file every x seconds and update our info.
@@ -15,6 +31,18 @@
 			range.innerHTML = "Measured Range is: " + data.range;
 			time.innerHTML = "Last Measured: " + data.time;
 		});
+
+		socket.on('liveStream', function(url) {
+			$('#stream').attr('src', url);
+			$('.start').hide();
+		});
+	
+	  function startStream() {
+    	socket.emit('start-stream');
+    	$('.start').hide();
+  		}
+
+
 	</script>
 	<script>
 		//The javascript to create a POST request back to app.js to operate the door
@@ -25,7 +53,7 @@
 			request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
 			request.send({});
 		}
-	</script>		
+	</script>	
 
 	</head>
 
@@ -37,20 +65,24 @@
 			<section>
 				<h1>Status</h1>	
 				<h2 id='status'>UNKNOWN</h2>
-				<button onclick="open()" name="OPEN"> Operate Door </button>
+				<button type="button" onclick="open()" name="OPEN"> Operate Door </button>
 				
 				<h2>Visual</h2>
-				
+				<button type="button" id="" onclick="startStream()">Start Camera</button>
+
+				<img id="stream" src="">
+
+			
 			</section>
 			
 			<section>
 				<h1> Other Details </h1>
-				<p> Temperature </p>
+				<p id='temp'> Temperature </p>
 				<p id='time'> Time </p>
 				<p id='range'> Sensor Range:  </p>
 			</section>
 			
-			<footer>Last updated 14 April 2017.</footer>
+			<footer>Last updated 15 April 2017.</footer>
 		</div>
 	</body>
 </html>
