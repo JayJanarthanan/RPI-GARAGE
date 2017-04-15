@@ -19,12 +19,17 @@ When I was in high school back in 2013, I was given a Raspberry Pi by my IT teac
 
 ## Architectural Overview
 
+I've got multiple sensors coming back to the Raspberry Pi, which is managed by a nodeJS module kept running using Forever.
+
+![Screenshot](http://i.imgur.com/h2uK1d1.jpg?raw=true)
 
 ## Setting Up Hardware
 
+Plug in your sensors at the start, use diagrams to determine where you want it to go. Install as required. 
 
 ## Setting Up Software
 
+Running out of time to finish the documentation, but basically, run the script in setup folder above, and clone this repo into your Pi. Using the forever module will keep it up! Don't forget about the port number.
 
 
 ## Acknowledgements
