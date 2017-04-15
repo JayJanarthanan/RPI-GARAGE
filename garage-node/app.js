@@ -6,6 +6,7 @@ var io = require('socket.io')(http);
 var async = require('async');
 var gpio = require('rpi-gpio');
 var fs = require('fs');
+var sendgrid = require('sendgrid')('azure_ea3d41ccd1bc355acf2d8cfc85de84e1@azure.com', sendgrid_password);
 
 var spawn = require('child_process').spawn;
 var proc;
@@ -150,7 +151,7 @@ var getStatus = function () {
     var sensor = usonic.createSensor(24, 23, 500);
     var distance = sensor();
 	distance = distance.toFixed(2);
-	
+
     var status = "Unknown";
 	var openValue = 25, closedValue = 80;
 
@@ -160,6 +161,8 @@ var getStatus = function () {
     
     if (distance < openValue) {
        	status = "Open";
+
+		   //check time and triggeer
     }
     else if(distance > closedValue) {
         status = "Closed";
@@ -207,6 +210,26 @@ setInterval(sendStatus, 5000);
 
 
 
+
+
+function sendEmail(){
+// https://docs.microsoft.com/en-us/azure/store-sendgrid-nodejs-how-to-send-email
+
+var email = new sendgrid.Email({
+    to: 'john@contoso.com',
+    from: 'notify@appavate.com',
+    subject: 'JANA GARAGE - TEST',
+    text: 'This email is a test email'
+});
+
+
+sendgrid.send(email, function(err, json){
+    if(err) { return console.error(err); }
+    console.log(json);
+});
+
+
+}
 
 
 
