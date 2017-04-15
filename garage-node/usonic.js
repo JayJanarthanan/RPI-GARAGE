@@ -16,6 +16,7 @@ http.listen(port, function(){
 });
 
 
+//RETURNS AN ARRAY [STATUS, DISTANCE]
 var getStatus = function () {
     var sensor = usonic.createSensor(24, 23, 500);
     var distance = sensor();
@@ -34,8 +35,10 @@ var getStatus = function () {
         process.stdout.write("UNKNOWN "+ statusText);
          status = "Unknown";
     }
-    return status;
+    return [status, distance];
   };
+
+
 
 usonic.init(function (error) {
     if (error) {
@@ -45,10 +48,16 @@ usonic.init(function (error) {
     }
 });
 
+function getTime(){
+    var datetime = new Date();
+    return datetime;
+}
+
 
 // Send current garage status to connected clients
 function sendStatus() {
-    io.emit('status', { status: getStatus() });
+    var statusReport = getStatus();
+    io.emit('status', { status: statusReport[0], range: statusReport[1], time: getTime() });
 }
 
 // Send current time every 5 secs

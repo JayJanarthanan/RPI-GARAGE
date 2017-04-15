@@ -8,7 +8,11 @@
 
 		socket.on('status', function(data) {
 			var status = document.getElementById('status');
+			var range = document.getElementById('range');
+			var time = document.getElementById('time');
 			status.innerHTML = data.status;
+			range.innerHTML = "Measured Range is: " + data.range;
+			time.innerHTML = "Last Measured: " + data.time;
 		});
 	</script>
 	<script>
@@ -42,8 +46,8 @@
 			<section>
 				<h1> Other Details </h1>
 				<p> Temperature </p>
-				<p> Time </p>
-				<p> Sensor Range </p>
+				<p id='time'> Time </p>
+				<p id='range'> Sensor Range:  </p>
 			</section>
 			
 			<footer>Last updated 14 April 2017.</footer>
