@@ -1,20 +1,19 @@
 var usonic = require('r-pi-usonic');
-var http = require('http'),
-    fs = require('fs'),
-    // NEVER use a Sync function except at start-up!
-    index = fs.readFileSync(__dirname + '/index.html');
+var express = require('express');
+var app = express();
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
+var port = process.env.PORT || 3000;
 
 
-// Send index.html to all requests
-var app = http.createServer(function(req, res) {
-    res.writeHead(200, {'Content-Type': 'text/html'});
-    res.end(index);
+
+app.get('/', function(req, res){
+    res.sendfile(__dirname + '/index.html');
 });
 
-
-
-// Socket.io server listens to our app
-var io = require('socket.io').listen(app);
+http.listen(port, function(){
+  console.log('listening on *:' + port);
+});
 
 
 var getStatus = function () {
@@ -54,7 +53,3 @@ function sendStatus() {
 
 // Send current time every 5 secs
 setInterval(sendStatus, 5000);
-
-
-
-app.listen(3000);

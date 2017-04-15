@@ -6,21 +6,8 @@
 	<script>
 		var socket = io();
 
-		socket.on('welcome', function(data) {
-			addMessage(data.message);
-			// Respond with a message including this clients' id sent from the server
-			socket.emit('i am client', {data: 'foo!', id: data.id});
+			var status = document.getElementById('status');
 		});
-		socket.on('status', function(data) {
-			addMessage(data.status);
-		});
-		
-		function addMessage(message) {
-			var text = document.createTextNode(message),
-				status = document.getElementById('status');
-
-			status.innerHTML = message;
-		}
 	</script>
 	<script>
 	function post(url) {
