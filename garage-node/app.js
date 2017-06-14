@@ -15,6 +15,17 @@ var proc;
 var port = process.env.PORT || 3000;
 var pin = 11;
 
+var sensor;
+
+// Initalise the Ultrasonic sensor, once and only once
+usonic.init(function (error) {
+    if (error) {
+        console.log("ERROR" + error);
+    } else {
+		//	sensor = usonic.createSensor(24, 23, 500);
+		//	console.log(sensor().toFixed(2));
+    }
+});
 
 //Setup the web page and processes
 
@@ -54,7 +65,7 @@ io.on('connection', function(socket) {
  
 });
 
-// Caled to end stream and stop wasting valuable memory
+// Called to end stream and stop wasting valuable memory
 function stopStreaming() {
 	console.log('Killing stream');
   if (Object.keys(sockets).length == 0) {
@@ -149,25 +160,27 @@ function delayedWrite(pin, value, callback) {
 
 //RETURNS AN ARRAY [STATUS, DISTANCE]
 var getStatus = function () {
-    var sensor = usonic.createSensor(24, 23, 500);
-    var distance = sensor();
-	distance = distance.toFixed(2);
+   // var sensor = usonic.createSensor(24, 23, 500);
+   // var distance = sensor();
+	//	distance = distance.toFixed(2);
+	var distance = 88;
 
     var status = "Unknown";
 	var openValue = 25, closedValue = 80;
 	var emailSent = false; //false when garage is open and no email, true when email sent.
 
-	if(distance < 0){
-		return["UNKNOWN", distance];
-	}
-    
-    if (distance < openValue) {
-       	status = "Open";
-		if(emailSent == false) // Check if email has already been sent.
-		{
-			sendEmail();
-			emailSent = true; //set that the email has been sent
+		if(distance < 0){
+			return["UNKNOWN", distance];
 		}
+    
+    else if (distance < openValue) {
+			status = "Open";
+			if(Boolean(emailSent)) // Check if email has already been sent.
+			{
+				emailSent = true; //set that the email has been sent
+				sendEmail();
+				
+			}
 
     }
     else if(distance > closedValue) {
@@ -182,14 +195,7 @@ var getStatus = function () {
   };
 
 
-// Initalise the Ultrasonic sensor, once and only once
-usonic.init(function (error) {
-    if (error) {
-        console.log(error);
-    } else {
-        //printDistance();
-    }
-});
+
 
 // Other functions
 // Need to work on this
