@@ -1,6 +1,6 @@
 var Gpio = require('pigpio').Gpio
 
-function getStatus()
+function getDistance()
 {
   trigger = new Gpio(23, {mode: Gpio.OUTPUT}),
   echo = new Gpio(24, {mode: Gpio.INPUT, alert: true});
@@ -26,10 +26,7 @@ function getStatus()
     }
   });
 
-  if(finalDistance != 0){
-    return finalDistance;
-  }
 }
 
-var distance = getStatus();
+var distance = getDistance();
 console.log(distance);
