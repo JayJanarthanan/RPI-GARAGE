@@ -1,12 +1,15 @@
-var usonic = require('r-pi-usonic');
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var async = require('async');
-var gpio = require('rpi-gpio');
 var fs = require('fs');
 var helper = require('sendgrid').mail;
+var gpio = require('pigpio').Gpio;
+
+
+
+/////////////////
 
 
 var spawn = require('child_process').spawn;
@@ -17,15 +20,7 @@ var pin = 11;
 
 var sensor;
 
-// Initalise the Ultrasonic sensor, once and only once
-usonic.init(function (error) {
-    if (error) {
-        console.log("ERROR" + error);
-    } else {
-		//	sensor = usonic.createSensor(24, 23, 500);
-		//	console.log(sensor().toFixed(2));
-    }
-});
+
 
 //Setup the web page and processes
 
@@ -100,54 +95,15 @@ function startStreaming(io) {
 
 
 // Door Functionality
-
-//This thing refuses to work
+// REDOING with piggpio
 var OperateDoor = function () {
 
- 	console.log("Operating Garage");
-	process.stdout.write("Operating Garage");
-
-	async.series([
-		function(callback) {
-			// Open pin for output
-			gpio.setup(pin, gpio.DIR_OUT);
-			console.log("SETUP");
-
-		},
-		function(callback) {
-			// Turn the relay on
-			gpio.write(pin, 1, callback);
-			console.log("GO HIGH");
-		},
-		function(callback) {
-			// Turn the relay off after delay to simulate button press
-			delayedWrite(pin, 0, callback);
-			console.log("GO LOW SLOW");
-		},
-
-		function(callback) {
-			// Turn the relay on
-			gpio.write(pin, 1, callback);
-			console.log("GO HIGH");
-		},
-		function(callback) {
-			gpio.destroy();
-			console.log("DESTROY");
-		},
-		function(err, results) {
-			setTimeout(function() {
-				console.log("ERROR");
-				// Close pin from further writing
-				//gpio.close(pin);
-				// Return json
-				res.json("ok");
-			}, 500);
-		}
-	]);
-
-	return;
 
 };
+
+
+
+
 // Hold for 500ms
 function delayedWrite(pin, value, callback) {
     setTimeout(function() {
@@ -160,19 +116,47 @@ function delayedWrite(pin, value, callback) {
 
 //RETURNS AN ARRAY [STATUS, DISTANCE]
 var getStatus = function () {
-   // var sensor = usonic.createSensor(24, 23, 500);
-   // var distance = sensor();
-	//	distance = distance.toFixed(2);
-	var distance = 88;
+	trigger = new gpio(23, {mode: gpio.OUTPUT}),
+	echo = new gpio(24, {mode: gpio.INPUT, alert: true});
 
-    var status = "Unknown";
+	// The number of microseconds it takes sound to travel 1cm at 20 degrees celcius
+	var MICROSECDONDS_PER_CM = 1e6/34321;
+	
+	trigger.trigger(10, 1);
+
+  var startTick;
+	distance = 0;
+  (function () {
+  var startTick;
+
+  echo.on('alert', function (level, tick) {
+    var endTick, diff;
+    if (level == 1) {
+      startTick = tick;
+    } 
+    else {
+      endTick = tick;
+      diff = (endTick >> 0) - (startTick >> 0); // Unsigned 32 bit arithmetic 
+			distance = (diff / 2 / MICROSECDONDS_PER_CM);
+			console.log(distance);
+    }
+
+
+    trigger.digitalWrite(0); // Make sure trigger is low
+  });
+	}());
+
+
+	process.stdout.write("HC-SO4: " + distance);
+
+  var status = "Unknown";
 	var openValue = 25, closedValue = 80;
 	var emailSent = false; //false when garage is open and no email, true when email sent.
 
-		if(distance < 0){
+		if(distance < 0)
+		{
 			return["UNKNOWN", distance];
 		}
-    
     else if (distance < openValue) {
 			status = "Open";
 			if(Boolean(emailSent)) // Check if email has already been sent.
@@ -183,16 +167,18 @@ var getStatus = function () {
 			}
 
     }
-    else if(distance > closedValue) {
-        status = "Closed";
-		emailSent = false; //reset email sent notification
+    else if(distance > closedValue) 
+		{
+      status = "Closed";
+			emailSent = false; //reset email sent notification
     }
-     else {
-		status = "Unknown";
+    else 
+		{
+			status = "Unknown";
     }
-	//process.stdout.write(status + " " + distance);
+		//process.stdout.write(status + " " + distance);
     return [status, distance];
-  };
+  }
 
 
 
