@@ -11,6 +11,7 @@ function getDistance()
   trigger.trigger(10, 1); 
 
   var startTick;
+  var haveResult = false;
 
   echo.on('alert', function (level, tick) {
     var endTick, diff;
@@ -23,10 +24,12 @@ function getDistance()
       finalDistance = diff / 2 / MICROSECDONDS_PER_CM
       console.log(finalDistance);
       trigger.digitalWrite(0); // Make sure trigger is low
+      return finalDistance;
     }
   });
 
+
+
 }
 
-var distance = getDistance();
-console.log(distance);
+getDistance();

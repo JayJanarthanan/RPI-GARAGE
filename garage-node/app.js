@@ -5,8 +5,9 @@ var io = require('socket.io')(http);
 var async = require('async');
 var fs = require('fs');
 var helper = require('sendgrid').mail;
-var gpio = require('pigpio').Gpio;
-
+var Gpio = require('pigpio').Gpio;
+var gpio = require('rpi-gpio');
+var PythonShell = require('python-shell');
 
 
 /////////////////
@@ -16,7 +17,7 @@ var spawn = require('child_process').spawn;
 var proc;
 
 var port = process.env.PORT || 3000;
-var pin = 11;
+var doorPin = 11;
 
 var sensor;
 
@@ -54,7 +55,7 @@ io.on('connection', function(socket) {
   });
 
     socket.on('operate-garage', function() {
-		console.log('Operate Door command received');
+		  console.log('Operate Door command received');
     	OperateDoor();
   });
  
@@ -94,30 +95,17 @@ function startStreaming(io) {
 
 
 
-// Door Functionality
-// REDOING with piggpio
+// Door Functionality just use python
 var OperateDoor = function () {
-
-
+  var spawn = require("child_process").spawn;
+  var process = spawn('python',["door.py"]);
 };
-
-
-
-
-// Hold for 500ms
-function delayedWrite(pin, value, callback) {
-    setTimeout(function() {
-        gpio.write(pin, value, callback);
-    }, 500);
-}
 
 
 // DOOR STATUS //
 
-//RETURNS AN ARRAY [STATUS, DISTANCE]
-var getStatus = function () {
-
-	process.stdout.write("HC-SO4: " + distance);
+//RETURNS AN ARRAY status
+var getStatus = function (distance) {
 
   var status = "Unknown";
 	var openValue = 25, closedValue = 80;
@@ -125,15 +113,14 @@ var getStatus = function () {
 
 		if(distance < 0)
 		{
-			return["UNKNOWN", distance];
+			return "UNKNOWN";
 		}
     else if (distance < openValue) {
 			status = "Open";
 			if(Boolean(emailSent)) // Check if email has already been sent.
 			{
-				emailSent = true; //set that the email has been sent
-				sendEmail();
-				
+				//emailSent = true; //set that the email has been sent
+				//sendEmail();	
 			}
 
     }
@@ -147,21 +134,19 @@ var getStatus = function () {
 			status = "Unknown";
     }
 		//process.stdout.write(status + " " + distance);
-    return [status, distance];
+    return status;
 }
 
 
 
-function getDistance()
+function sendStatus()
 {
   trigger = new Gpio(23, {mode: Gpio.OUTPUT}),
   echo = new Gpio(24, {mode: Gpio.INPUT, alert: true});
 
   // The number of microseconds it takes sound to travel 1cm at 20 degrees celcius
   var MICROSECDONDS_PER_CM = 1e6/34321;
-  var finalDistance = 0;
   trigger.trigger(10, 1); 
-
   var startTick;
 
   echo.on('alert', function (level, tick) {
@@ -173,10 +158,11 @@ function getDistance()
       endTick = tick;
       diff = (endTick >> 0) - (startTick >> 0); // Unsigned 32 bit arithmetic
       finalDistance = diff / 2 / MICROSECDONDS_PER_CM
+      finalDistance = finalDistance.toFixed(2);
       trigger.digitalWrite(0); // Make sure trigger is low
 
-
-
+      var statusReport = getStatus(finalDistance);
+      io.emit('status', { status: statusReport, range: finalDistance, time: getTime() });
     }
   });
 
@@ -198,17 +184,9 @@ function getTime(){
 }
 
 
-// Send current garage status to connected clients
-function sendStatus() {
-    var statusReport = getStatus();
-    io.emit('status', { status: statusReport[0], range: statusReport[1], time: getTime() });
-}
 
 // Send current status of the garage every 5 seconds
 setInterval(sendStatus, 5000);
-
-
-
 
 
 function sendEmail(){
@@ -239,8 +217,6 @@ function sendEmail(){
 
 
 }
-
-
 
 
 ///// CREDITS /////////////
