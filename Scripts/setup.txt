@@ -1,5 +1,6 @@
 sudo apt-get update && sudo apt-get upgrade  
 sudo apt-get install nodejs npm node-semver
 mkdir garage-node && cd garage-node
-sudo npm install async express r-pi-usonic rpi-gpio socket.io sendgrid
+sudo npm install express async node-datetime child_process fs http pigpio python-shell sendgrid socket.io
+sudo npm install -g forever-service
 sudo reboot

@@ -1,19 +1,24 @@
-var usonic = require('r-pi-usonic');
 var express = require('express');
 var app = express();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
 var async = require('async');
-var gpio = require('rpi-gpio');
-var fs = require('fs');
-var helper = require('sendgrid').mail;
-
-
+var datetime = require('node-datetime');
 var spawn = require('child_process').spawn;
+var fs = require('fs');
+var http = require('http').Server(app);
+var Gpio = require('pigpio').Gpio;
+var PythonShell = require('python-shell');
+var helper = require('sendgrid').mail;
+var io = require('socket.io')(http);
+
+/////// Variables //////////
+
 var proc;
 
-var port = process.env.PORT || 3000;
-var pin = 11;
+var port = process.env.PORT || 80; //Port 80 for prod, 3000 for test
+var doorPin = 11; // the Board GPIO Pin to control the relay for door
+
+var sensor;
+
 
 
 //Setup the web page and processes
@@ -48,13 +53,13 @@ io.on('connection', function(socket) {
   });
 
     socket.on('operate-garage', function() {
-		console.log('Operate Door command received');
+		  console.log('Operate Door command received');
     	OperateDoor();
   });
  
 });
 
-// Caled to end stream and stop wasting valuable memory
+// Called to end stream and stop wasting valuable memory
 function stopStreaming() {
 	console.log('Killing stream');
   if (Object.keys(sockets).length == 0) {
@@ -88,135 +93,98 @@ function startStreaming(io) {
 
 
 
-// Door Functionality
-
-//This thing refuses to work
+// Door Functionality just use python
 var OperateDoor = function () {
-
- 	console.log("Operating Garage");
-	process.stdout.write("Operating Garage");
-
-	async.series([
-		function(callback) {
-			// Open pin for output
-			gpio.setup(pin, gpio.DIR_OUT);
-			console.log("SETUP");
-
-		},
-		function(callback) {
-			// Turn the relay on
-			gpio.write(pin, 1, callback);
-			console.log("GO HIGH");
-		},
-		function(callback) {
-			// Turn the relay off after delay to simulate button press
-			delayedWrite(pin, 0, callback);
-			console.log("GO LOW SLOW");
-		},
-
-		function(callback) {
-			// Turn the relay on
-			gpio.write(pin, 1, callback);
-			console.log("GO HIGH");
-		},
-		function(callback) {
-			gpio.destroy();
-			console.log("DESTROY");
-		},
-		function(err, results) {
-			setTimeout(function() {
-				console.log("ERROR");
-				// Close pin from further writing
-				//gpio.close(pin);
-				// Return json
-				res.json("ok");
-			}, 500);
-		}
-	]);
-
-	return;
-
+  var process = spawn('python',["door.py"]);
 };
-// Hold for 500ms
-function delayedWrite(pin, value, callback) {
-    setTimeout(function() {
-        gpio.write(pin, value, callback);
-    }, 500);
-}
 
 
 // DOOR STATUS //
 
-//RETURNS AN ARRAY [STATUS, DISTANCE]
-var getStatus = function () {
-    var sensor = usonic.createSensor(24, 23, 500);
-    var distance = sensor();
-	distance = distance.toFixed(2);
+//RETURNS AN ARRAY status
+var getStatus = function (distance) {
 
-    var status = "Unknown";
+  var status = "UNKNOWN";
 	var openValue = 25, closedValue = 80;
 	var emailSent = false; //false when garage is open and no email, true when email sent.
 
-	if(distance < 0){
-		return["UNKNOWN", distance];
-	}
-    
-    if (distance < openValue) {
-       	status = "Open";
-		if(emailSent == false) // Check if email has already been sent.
+		if(distance < 0)
 		{
-			sendEmail();
-			emailSent = true; //set that the email has been sent
+			return "ERROR";
 		}
+    else if (distance < openValue) {
+			status = "OPEN";
+			if(Boolean(emailSent)) // Check if email has already been sent.
+			{
+				//emailSent = true; //set that the email has been sent
+				//sendEmail();	
+			}
 
     }
-    else if(distance > closedValue) {
-        status = "Closed";
-		emailSent = false; //reset email sent notification
+    else if(distance > closedValue) 
+		{
+      status = "CLOSED";
+			emailSent = false; //reset email sent notification
     }
-     else {
-		status = "Unknown";
+    else 
+		{
+			status = "UNKNOWN";
     }
-	//process.stdout.write(status + " " + distance);
-    return [status, distance];
-  };
+		//process.stdout.write(status + " " + distance);
+    return status;
+}
 
 
-// Initalise the Ultrasonic sensor, once and only once
-usonic.init(function (error) {
-    if (error) {
-        console.log(error);
+
+function sendStatus()
+{
+  trigger = new Gpio(23, {mode: Gpio.OUTPUT}),
+  echo = new Gpio(24, {mode: Gpio.INPUT, alert: true});
+
+  // The number of microseconds it takes sound to travel 1cm at 20 degrees celcius
+  var MICROSECDONDS_PER_CM = 1e6/34321;
+  trigger.trigger(10, 1); 
+  var startTick;
+
+  echo.on('alert', function (level, tick) {
+    var endTick, diff;
+
+    if (level == 1) {
+      startTick = tick;
     } else {
-        //printDistance();
+      endTick = tick;
+      diff = (endTick >> 0) - (startTick >> 0); // Unsigned 32 bit arithmetic
+      finalDistance = diff / 2 / MICROSECDONDS_PER_CM
+      finalDistance = finalDistance.toFixed(2);
+      trigger.digitalWrite(0); // Make sure trigger is low
+
+      var statusReport = getStatus(finalDistance); //Get the humanised info
+      // Send the details to the HTML site
+      io.emit('status', { status: statusReport, range: finalDistance, time: getTime() });
     }
-});
+  });
+
+}
 
 // Other functions
 // Need to work on this
 function getTime(){
-  var a = new Date();
-  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  var year = a.getFullYear();
-  var month = months[a.getMonth()];
-  var date = a.getDate();
-  var hour = a.getHours();
-  var min = a.getMinutes();
-  var sec = a.getSeconds();
-  var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
-  return time;
+  var dt = datetime.create();
+  var formatted = dt.format('H:M:S d-m-Y');
+  return formatted;
 }
 
 
-// Send current garage status to connected clients
-function sendStatus() {
-    var statusReport = getStatus();
-    io.emit('status', { status: statusReport[0], range: statusReport[1], time: getTime() });
-}
 
 // Send current status of the garage every 5 seconds
 setInterval(sendStatus, 5000);
 
 
+
+
+
+
+/////////////////////// EXTRA CODE FOR FUTURE USE ////////////////////////////////////////
 
 
 
@@ -248,8 +216,6 @@ function sendEmail(){
 
 
 }
-
-
 
 
 ///// CREDITS /////////////
