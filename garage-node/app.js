@@ -169,7 +169,7 @@ function sendStatus()
 // Other functions
 // Need to work on this
 function getTime(){
-  var dt = dateTime.create();
+  var dt = datetime.create();
   var formatted = dt.format('H:M:S d-m-Y');
   return formatted;
 }
