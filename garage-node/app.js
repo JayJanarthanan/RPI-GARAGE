@@ -1,23 +1,21 @@
 var express = require('express');
 var app = express();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
 var async = require('async');
-var fs = require('fs');
-var helper = require('sendgrid').mail;
-var Gpio = require('pigpio').Gpio;
-var gpio = require('rpi-gpio');
-var PythonShell = require('python-shell');
-
-
-/////////////////
-
-
+var datetime = require('node-datetime');
 var spawn = require('child_process').spawn;
+var fs = require('fs');
+var http = require('http').Server(app);
+var Gpio = require('pigpio').Gpio;
+var PythonShell = require('python-shell');
+var helper = require('sendgrid').mail;
+var io = require('socket.io')(http);
+
+/////// Variables //////////
+
 var proc;
 
-var port = process.env.PORT || 3000;
-var doorPin = 11;
+var port = process.env.PORT || 80; //Port 80 for prod, 3000 for test
+var doorPin = 11; // the Board GPIO Pin to control the relay for door
 
 var sensor;
 
@@ -97,7 +95,6 @@ function startStreaming(io) {
 
 // Door Functionality just use python
 var OperateDoor = function () {
-  var spawn = require("child_process").spawn;
   var process = spawn('python',["door.py"]);
 };
 
@@ -107,16 +104,16 @@ var OperateDoor = function () {
 //RETURNS AN ARRAY status
 var getStatus = function (distance) {
 
-  var status = "Unknown";
+  var status = "UNKNOWN";
 	var openValue = 25, closedValue = 80;
 	var emailSent = false; //false when garage is open and no email, true when email sent.
 
 		if(distance < 0)
 		{
-			return "UNKNOWN";
+			return "ERROR";
 		}
     else if (distance < openValue) {
-			status = "Open";
+			status = "OPEN";
 			if(Boolean(emailSent)) // Check if email has already been sent.
 			{
 				//emailSent = true; //set that the email has been sent
@@ -126,12 +123,12 @@ var getStatus = function (distance) {
     }
     else if(distance > closedValue) 
 		{
-      status = "Closed";
+      status = "CLOSED";
 			emailSent = false; //reset email sent notification
     }
     else 
 		{
-			status = "Unknown";
+			status = "UNKNOWN";
     }
 		//process.stdout.write(status + " " + distance);
     return status;
@@ -161,7 +158,8 @@ function sendStatus()
       finalDistance = finalDistance.toFixed(2);
       trigger.digitalWrite(0); // Make sure trigger is low
 
-      var statusReport = getStatus(finalDistance);
+      var statusReport = getStatus(finalDistance); //Get the humanised info
+      // Send the details to the HTML site
       io.emit('status', { status: statusReport, range: finalDistance, time: getTime() });
     }
   });
@@ -171,22 +169,23 @@ function sendStatus()
 // Other functions
 // Need to work on this
 function getTime(){
-  var a = new Date();
-  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  var year = a.getFullYear();
-  var month = months[a.getMonth()];
-  var date = a.getDate();
-  var hour = a.getHours();
-  var min = a.getMinutes();
-  var sec = a.getSeconds();
-  var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
-  return time;
+  var dt = dateTime.create();
+  var formatted = dt.format('H:M:S d-m-Y');
+  return formatted;
 }
 
 
 
 // Send current status of the garage every 5 seconds
 setInterval(sendStatus, 5000);
+
+
+
+
+
+
+/////////////////////// EXTRA CODE FOR FUTURE USE ////////////////////////////////////////
+
 
 
 function sendEmail(){
