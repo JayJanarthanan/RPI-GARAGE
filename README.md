@@ -36,6 +36,3 @@ Running out of time to finish the documentation, but basically, run the script i
 
 Why re-invent the wheel? A lot of what I have done here is based on the generous time of people on StackOverflow and the work of many others that have kindly open sourced and freely licensed their code. I am very grateful for this. With that spirit, you are welcome to use my code however you wish under the MIT License. If you need any help, don't hesitate to email me!
 
-Camera Arm: Arvind Ravulavaru - http://thejackalofjavascript.com/rpi-live-streaming/ / https://github.com/arvindr21/pi_livestreaming
-Proximity Arm: Arvind Ravulavaru - http://thejackalofjavascript.com/rpi-an-ultrasonic-sensor-measure-distances/ / https://github.com/arvindr21/pi_ultraSonicSensor
-Web Sockets: http://stackoverflow.com/questions/9914816/what-is-an-example-of-the-simplest-possible-socket-io-example 
