@@ -1,13 +1,30 @@
 {
-  "name": "Garage",
-  "version": "0.0.1",
+  "name": "Jana Garage",
+  "description": "A garage controller for the Raspberry Pi",
+  "version": "1.0.0",
+  "main": "app.js",
   "private": true,
   "scripts": {
     "start": "node app"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JayJanarthanan/RPI-GARAGE"
+  },
   "dependencies": {
     "express": "4.8.0",
-    "jade": "*",
-    "async": "0.2.6"
-  }
+    "async": "0.2.6",
+    "datetime":"*",
+    "child_process":"*",
+    "node-datetime":"*",
+    "fs":"*",
+    "http":"*",
+    "pigpio":"*",
+    "python-shell":"*",
+    "sendgrid":"*",
+    "socket.io":"*"
+  },
+  "author": "Jay Janarthanan",
+  "license": "GPL-3.0",
+  "homepage": "https://github.com/JayJanarthanan/RPI-GARAGE"
 }
