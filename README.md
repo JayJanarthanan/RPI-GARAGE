@@ -1,9 +1,5 @@
 # RPI-GARAGE
-A NodeJS Powered Raspberry Pi system for Garage operations
-
-## History
-
-When I was in high school back in 2013, I was given a Raspberry Pi by my IT teacher. This Pi opened my doors to the world of hardware, software and everything in between. My first project was to hook up our garage to the Pi and control it. This was done with PHP, Apache and Python. Four years on, with a career started and a passion sparked, the world has moved on and I got myself a Raspberry Pi 2B upgrade. With the upgrade I decided to tune things up a bit - and along came this revised project. If you were looking for the old project, it's still available within the old commits. I strongly urge you to use this new one - I've got it working and it should work fine for you with some minor tweaks. 
+A NodeJS Powered Raspberry Pi system for Garage operations 
 
 ## Hardware Used
 - Raspberry Pi 2B
