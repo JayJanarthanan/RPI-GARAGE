@@ -69,3 +69,10 @@ sudo reboot
 ```
 
 10. Go to directory and run `node app.js`. The app should now start and run.
+
+## Running with Forever
+
+1. Install Forever `sudo -i npm install forever -g`
+2. Run as admin: `sudo forever start app.js`
+3. Visit Crontab `crontab -u pi -e`
+4. Add `@reboot sudo /usr/bin/sudo -u pi -H /usr/local/bin/forever start /home/pi/RPI-GARAGE/garage-node/app.js
