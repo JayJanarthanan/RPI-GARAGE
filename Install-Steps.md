@@ -59,4 +59,4 @@ sudo npm install -g forever-service
 sudo reboot
 ```
 
-10. Ensure 
+10. Go to directory and run `node app.js`. The app should now start and run.
