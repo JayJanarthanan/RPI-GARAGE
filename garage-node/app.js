@@ -7,7 +7,6 @@ var fs = require('fs');
 var http = require('http').Server(app);
 var Gpio = require('pigpio').Gpio;
 var PythonShell = require('python-shell');
-var helper = require('sendgrid').mail;
 var io = require('socket.io')(http);
 
 /////// Variables //////////
@@ -179,41 +178,10 @@ function getTime(){
 // Send current status of the garage every 5 seconds
 setInterval(sendStatus, 5000);
 
-
-
-
-
-
 /////////////////////// EXTRA CODE FOR FUTURE USE ////////////////////////////////////////
 
 
-
 function sendEmail(){
-// from SendGrid v3 Docs
-
-	var API_KEY = '<INSERT_HERE>'
-
-	from_email = new helper.Email("notify@appavate.com");
-	to_email = new helper.Email("support@appavate.com");
-	subject = "JANA GARAGE - OPEN";
-	content = new helper.Content("text/plain", "Hi There, The Raspberry Pi in your garage has detected your garage is open at this time. Thanks, Jay");
-	mail = new helper.Mail(from_email, subject, to_email, content);
-
-
-	var sg = require('sendgrid')(API_KEY);
-	var request = sg.emptyRequest({
-		method: 'POST',
-		path: '/v3/mail/send',
-		body: mail.toJSON()
-	});
-
-	sg.API(request, function(error, response) {
-		if(response.statusCode == 202)
-		{
-		console.log("Email successfully sent.");
-		}
-	});
-
 
 }
 
