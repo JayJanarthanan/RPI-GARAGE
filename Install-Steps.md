@@ -30,6 +30,15 @@ fi
   * Ensure script can run with this: `sudo chmod 775 /usr/local/bin/checkwifi.sh`
   * Visit crontab with `crontab -e.`
   * Add this in crontab and save: `*/5 * * * * /usr/bin/sudo -H /usr/local/bin/checkwifi.sh >> /dev/null 2>&1`
+  * Visit `sudo nano /etc/dhcpcd.conf` to setup Static IP (Forced by Raspberry Pi)
+  * Enter the following:
+  
+  ``` interface wlan0
+
+static ip_address=192.168.1.x/24 //The x is the IP you want
+static routers=192.168.1.254 //Your Router Gateway
+static domain_name_servers=192.168.1.254 //Your Router Gateway
+```
 
 6. Configure Raspberry Pi Settings  
   * `sudo raspi-config`
